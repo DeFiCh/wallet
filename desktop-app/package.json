@@ -1,0 +1,87 @@
+{
+  "name": "@defich/desktop-wallet",
+  "version": "0.0.0",
+  "description": "DeFiChain Wallet for Desktop (Mac, Linux and Windows).",
+  "main": "./dist/index.js",
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron ./dist/index.js"
+  },
+  "dependencies": {
+    "electron": "15.3.0",
+    "electron-log": "^4.4.1"
+  },
+  "devDependencies": {
+    "electron-builder": "22.13.1",
+    "electron-debug": "^3.2.0",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-notarize": "1.1.1"
+  },
+  "build": {
+    "productName": "DeFiChain Wallet",
+    "appId": "com.defichain.desktop.wallet",
+    "copyright": "Copyright © 2021 DeFiChain Wallet Contributors",
+    "asar": true,
+    "afterSign": "./notarize.js",
+    "files": [
+      "./dist",
+      {
+        "from": "../web-build/",
+        "to": "./web-build/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "icon": "./src/assets/icon-512.png",
+    "dmg": {
+      "sign": false,
+      "icon": ".src/assets/app.icns",
+      "contents": [
+        {
+          "x": 40,
+          "y": 150
+        },
+        {
+          "x": 350,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "icon": "./src/assets/icon-512.png",
+      "target": [
+        "AppImage"
+      ]
+    },
+    "win": {
+      "target": "NSIS"
+    },
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dmg"
+      ],
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "./entitlements.mac.plist",
+      "entitlementsInherit": "./entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "publish": {
+      "provider": "github",
+      "repo": "wallet",
+      "owner": "DeFiCh",
+      "releaseType": "prerelease"
+    }
+  }
+}
