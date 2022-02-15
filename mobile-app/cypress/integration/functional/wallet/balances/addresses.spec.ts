@@ -40,7 +40,7 @@ context('Wallet - Addresses', () => {
   })
 
   it('should be able to create new address when all available address are active', function () {
-    cy.sendDFItoWallet().wait(3000)
+    cy.sendDFItoWallet().wait(6000)
     cy.getByTestID('dfi_utxo_amount').contains('10.00000000')
     cy.getByTestID('dfi_token_amount').contains('0.00000000')
     cy.getByTestID('dfi_total_balance_amount').contains('10.00000000')
@@ -56,8 +56,6 @@ context('Wallet - Addresses', () => {
     cy.getByTestID('switch_account_button').should('exist').click().wait(1000)
     cy.getByTestID('address_row_0').should('exist')
     cy.getByTestID('address_row_1').should('exist')
-    cy.go('back')
-    cy.getByTestID('switch_account_button').should('exist').click().wait(1000)
     cy.getByTestID('create_new_address').should('not.exist')
     cy.getByTestID('address_row_text_1').invoke('text').then((address: string) => {
       cy.getByTestID(`address_active_indicator_${address}`).should('exist')
@@ -251,20 +249,20 @@ context('Wallet - Addresses should able to create maximum 10 addresses', () => {
     cy.getByTestID('dfi_utxo_amount').contains('0.00000000')
     cy.getByTestID('dfi_token_amount').contains('0.00000000')
     cy.getByTestID('dfi_total_balance_amount').contains('0.00000000')
-    cy.sendDFItoWallet().wait(3000)
+    cy.sendDFItoWallet().wait(6000)
     cy.getByTestID('dfi_utxo_amount').contains('10.00000000')
     cy.getByTestID('dfi_token_amount').contains('0.00000000')
     cy.getByTestID('dfi_total_balance_amount').contains('10.00000000')
-    for (let i = 1; i < 10; i++) {
+    cy.wrap(Array.from(Array(9), (_v, i) => i)).each(() => {
       cy.getByTestID('bottom_tab_balances').click()
       cy.getByTestID('switch_account_button').should('exist').click().wait(1000)
       cy.url().should('include', 'app/AddressControlScreen')
       cy.getByTestID('create_new_address').should('exist').click()
-      cy.sendDFItoWallet().wait(3000)
+      cy.sendDFItoWallet().wait(6000)
       cy.getByTestID('dfi_utxo_amount').contains('10.00000000')
       cy.getByTestID('dfi_token_amount').contains('0.00000000')
       cy.getByTestID('dfi_total_balance_amount').contains('10.00000000')
-    }
+    })
     cy.getByTestID('create_new_address').should('not.exist')
   })
 })
