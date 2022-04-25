@@ -4,7 +4,8 @@
   "license": "MIT",
   "main": "index.js",
   "workspaces": [
-    "./website"
+    "./website",
+    "./desktop-app"
   ],
   "scripts": {
     "prepare": "husky install",
@@ -69,6 +70,7 @@
     "expo-web-browser": "~10.1.0",
     "i18n-js": "^3.8.0",
     "install": "^0.13.0",
+    "is-electron": "^2.2.0",
     "lodash": "^4.17.21",
     "lru-cache": "^7.7.1",
     "react": "17.0.1",
@@ -123,6 +125,7 @@
     "babel-plugin-istanbul": "^6.1.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "colors": "1.4.0",
+    "copy-webpack-plugin": "^6.0.4",
     "cypress": "^9.5.4",
     "cypress-image-diff-js": "1.18.1",
     "eas-cli": "^0.51.0",

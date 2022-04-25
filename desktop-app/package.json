@@ -1,0 +1,121 @@
+{
+  "name": "@defich/desktop-wallet",
+  "version": "0.0.0",
+  "description": "DeFi Blockchain Light Wallet for Desktop (Mac, Linux and Windows).",
+  "main": "./main/build/main.js",
+  "author": {
+    "name": "DeFiChain Foundation",
+    "email": "engineering@defichain.com",
+    "url": "https://defichain.com/"
+  },
+  "scripts": {
+    "transpile": "tsc --p main/tsconfig.json",
+    "start:dev": "concurrently -p \"[{time} - {name}]\" -n \"ReactApp,Electron\" -c \"bgMagenta.black.bold,bgCyan.black.bold\" -t \"hh:mm:ss a\" \"npm run start:react\" \"npm run start:electron\"",
+    "start:react": "cd .. && expo start --clear --web",
+    "start:electron": "node main/initiate-electron",
+    "electron": "cross-env mode=development WEB_PUBLIC_URL=./ electron -r ts-node/register/transpile-only ./main/main.ts --inspect -d true",
+    "build:react": "cd .. && cross-env WEB_PUBLIC_URL=./ mode=production expo build:web --no-pwa",
+    "build:electron": "npm run build:react && npm run transpile && electron-builder -p never",
+    "postinstall": "electron-builder install-app-deps",
+    "publish": "npm run build:electron && electron-builder build -p always"
+  },
+  "dependencies": {
+    "electron-debug": "^3.2.0",
+    "electron-log": "^4.4.6",
+    "electron-updater": "5.0.1",
+    "foreman": "^3.0.1",
+    "is-electron": "^2.2.0",
+    "loglevel": "^1.8.0"
+  },
+  "devDependencies": {
+    "concurrently": "7.0.0",
+    "cross-env": "7.0.3",
+    "electron": "18.1.0",
+    "electron-builder": "23.0.3",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-notarize": "1.2.1",
+    "install": "^0.13.0",
+    "jest": "26.6.0",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "build": {
+    "productName": "DeFiChain Wallet",
+    "appId": "com.defichain.desktop.wallet",
+    "copyright": "Copyright © 2021 ${author}",
+    "asar": true,
+    "afterSign": "./notarize/notarize.js",
+    "files": [
+      "./main/build",
+      {
+        "from": "../web-build/",
+        "to": "./web-build/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "icon": "../shared/assets/images/icon-512.png",
+    "dmg": {
+      "sign": false,
+      "icon": "../shared/assets/images/app.icns",
+      "contents": [
+        {
+          "x": 40,
+          "y": 150
+        },
+        {
+          "x": 350,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "icon": "../shared/assets/images/icon-512.png",
+      "target": [
+        "AppImage"
+      ]
+    },
+    "win": {
+      "target": "NSIS"
+    },
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dmg"
+      ],
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "./notarize/entitlements.mac.plist",
+      "entitlementsInherit": "./notarize/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "publish": {
+      "provider": "github",
+      "repo": "wallet",
+      "owner": "DeFiCh",
+      "releaseType": "prerelease"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

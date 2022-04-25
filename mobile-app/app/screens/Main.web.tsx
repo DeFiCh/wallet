@@ -7,11 +7,9 @@ import { useThemeContext } from '@shared-contexts/ThemeProvider'
 import { tailwind } from '@tailwind'
 import { PlaygroundNavigator } from './PlaygroundNavigator/PlaygroundNavigator'
 import { RootNavigator } from './RootNavigator'
-import { EnvironmentName, getEnvironment } from '@environment'
-import { getReleaseChannel } from '@api/releaseChannel'
+import Constants from 'expo-constants'
 
 export function Main (): JSX.Element {
-  const env = getEnvironment(getReleaseChannel())
   const { isLight } = useThemeContext()
   const DeFiChainTheme: Theme = getDefaultTheme(isLight)
   return (
@@ -20,13 +18,16 @@ export function Main (): JSX.Element {
         <RootNavigator />
       </View>
 
-      {env.name !== EnvironmentName.Production && (
-        <View style={[styles.phone, tailwind('bg-white ml-2')]}>
-          <NavigationContainer theme={DeFiChainTheme}>
-            <PlaygroundNavigator />
-          </NavigationContainer>
-        </View>
-      )}
+      {
+        Constants?.manifest?.extra?.mode !== 'production' && (
+          <View style={[styles.phone, tailwind('bg-white ml-2')]}>
+            <NavigationContainer theme={DeFiChainTheme}>
+              <PlaygroundNavigator />
+            </NavigationContainer>
+          </View>
+        )
+      }
+
     </View>
   )
 }
@@ -36,7 +37,7 @@ export function Main (): JSX.Element {
  */
 const styles = StyleSheet.create({
   phone: {
-    height: 667,
+    height: Constants?.manifest?.extra?.appType === 'extension' ? 600 : 667,
     width: 375
   }
 })

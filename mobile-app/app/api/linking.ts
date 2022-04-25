@@ -5,13 +5,14 @@ import * as WebBrowser from 'expo-web-browser'
 export async function openURL (url: string): Promise<void> {
   if (Platform.OS === 'web') {
     window.open(url, '_target')
-    return
+  } else {
+    if (Platform.OS !== 'android') {
+      const supported = await Linking.canOpenURL(url)
+      if (supported) {
+        await Linking.openURL(url)
+        return
+      }
+    }
+    await WebBrowser.openBrowserAsync(url)
   }
-
-  if (Platform.OS !== 'android' && await Linking.canOpenURL(url)) {
-    await Linking.openURL(url)
-    return
-  }
-
-  await WebBrowser.openBrowserAsync(url)
 }
