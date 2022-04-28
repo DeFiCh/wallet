@@ -23,7 +23,6 @@ import { IconButton } from '@components/IconButton'
 import { useAuctionBidValue } from '../hooks/AuctionBidValue'
 import { useAuctionTime } from '../hooks/AuctionTimeLeft'
 import { QuickBid } from '../components/QuickBid'
-import { AuctionBidStatus } from '@screens/AppNavigator/screens/Auctions/components/BatchCard'
 import { useWalletContext } from '@shared-contexts/WalletContext'
 import { fetchTokens, tokensSelector } from '@store/wallet'
 import { useWhaleApiClient } from '@shared-contexts/WhaleContext'
@@ -31,6 +30,7 @@ import { BidHistory } from '../components/BidHistory'
 import { MinNextBidTextRow } from '../components/MinNextBidTextRow'
 import { LoanVaultLiquidationBatch } from '@defichain/whale-api-client/dist/api/loan'
 import { fetchAuctions } from '@store/auctions'
+import { AuctionBidStatus } from '../components/BatchCard'
 
 type BatchDetailScreenProps = StackScreenProps<AuctionsParamList, 'AuctionDetailScreen'>
 
@@ -53,7 +53,7 @@ export function AuctionDetailScreen (props: BatchDetailScreenProps): JSX.Element
     minNextBidInToken,
     totalCollateralsValueInUSD,
     minNextBidInUSD
-   } = useAuctionBidValue(batch, vault.liquidationPenalty)
+  } = useAuctionBidValue(batch, vault.liquidationPenalty)
   const blockCount = useSelector((state: RootState) => state.block.count) ?? 0
   const { blocksRemaining } = useAuctionTime(vault.liquidationHeight, blockCount)
   const { address } = useWalletContext()
@@ -149,7 +149,7 @@ export function AuctionDetailScreen (props: BatchDetailScreenProps): JSX.Element
       <ThemedView
         light={tailwind('bg-gray-50')}
         style={tailwind(['flex-1', { 'pb-36': Platform.OS !== 'web' }
-      ])}
+        ])}
       >
         <ThemedView
           light={tailwind('bg-white border-gray-200')}
@@ -204,19 +204,16 @@ export function AuctionDetailScreen (props: BatchDetailScreenProps): JSX.Element
               />
             </View>
           </View>
-
           {batch?.highestBid?.owner === address && (
             <View style={tailwind('mb-1')}>
               <AuctionBidStatus testID='batch_detail' type='highest' />
             </View>
           )}
-
           <AuctionTimeProgress
             liquidationHeight={vault.liquidationHeight}
             blockCount={blockCount}
             label='Auction time remaining'
           />
-
         </ThemedView>
         <Tabs tabSections={tabsList} testID='auction_detail_tab' activeTabKey={activeTab} />
         {activeTab === TabKey.BidHistory && (

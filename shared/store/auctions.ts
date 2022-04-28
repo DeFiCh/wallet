@@ -1,7 +1,6 @@
-import BigNumber from 'bignumber.js'
 import { WhaleApiClient } from '@defichain/whale-api-client'
 import { LoanVaultLiquidated, LoanVaultLiquidationBatch, VaultAuctionBatchHistory } from '@defichain/whale-api-client/dist/api/loan'
-import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface AuctionsState {
   auctions: LoanVaultLiquidated[]
@@ -37,7 +36,7 @@ export const fetchBidHistory = createAsyncThunk(
     batchIndex,
     client,
     size = 200
-  }: { vaultId: string, liquidationHeight: number, batchIndex: number, client: WhaleApiClient, size: number}) => {
+  }: { vaultId: string, liquidationHeight: number, batchIndex: number, client: WhaleApiClient, size: number }) => {
     return await client.loan.listVaultAuctionHistory(vaultId, liquidationHeight, batchIndex, size)
   }
 )
@@ -60,38 +59,3 @@ export const auctions = createSlice({
     })
   }
 })
-
-/**
- * Flattens the auctions -> batch
- * Filters by search term
- * Sorts by liquidation height
- */
- export const auctionsSearchByTermSelector = createSelector([
-  (state: AuctionsState) => state.auctions,
-  (_state: AuctionsState, searchTerm: string) => searchTerm
-  ],
-  (auctions, searchTerm: string) => {
-    return auctions
-    .reduce<AuctionBatchProps[]>((auctionBatches, auction): AuctionBatchProps[] => {
-      const filteredAuctionBatches = auctionBatches
-      if (searchTerm === '' || searchTerm === undefined) {
-        auction.batches.forEach(batch => {
-          filteredAuctionBatches.push({
-            ...batch, auction
-          })
-        })
-      } else {
-        auction.batches.forEach(batch => {
-        if (batch.loan.displaySymbol.toLowerCase().includes(searchTerm.trim().toLowerCase())) {
-            filteredAuctionBatches.push({
-              ...batch, auction
-            })
-          }
-        })
-      }
-
-      return filteredAuctionBatches
-    }, [])
-    .sort((a, b) => new BigNumber(a.auction.liquidationHeight).minus(b.auction.liquidationHeight).toNumber())
-  }
-)
