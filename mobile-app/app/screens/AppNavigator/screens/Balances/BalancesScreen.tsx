@@ -508,13 +508,6 @@ export function BalancesScreen ({ navigation }: Props): JSX.Element {
               modalRef={containerRef}
               screenList={showAssetSortBottomSheet ? assetSortBottomSheetScreen : addressBottomSheetScreen}
               isModalDisplayed={isModalDisplayed}
-              modalStyle={{
-                position: 'absolute',
-                bottom: '0',
-                height: '505px',
-                width: '375px',
-                zIndex: 50
-              }}
             />
           )
           : (

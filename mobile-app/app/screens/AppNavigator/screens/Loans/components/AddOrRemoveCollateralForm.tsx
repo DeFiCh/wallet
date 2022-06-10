@@ -32,6 +32,7 @@ import { getPrecisedTokenValue } from '@screens/AppNavigator/screens/Auctions/he
 import { useFeatureFlagContext } from '@contexts/FeatureFlagContext'
 import { TokenIconGroup } from '@components/TokenIconGroup'
 import { IconTooltip } from '@components/tooltip/IconTooltip'
+import { useMaxLoan } from '../hooks/MaxLoan'
 
 export interface AddOrRemoveCollateralFormProps {
   collateralItem: CollateralItem
@@ -134,7 +135,23 @@ export const AddOrRemoveCollateralForm = memo(({ route }: Props): JSX.Element =>
     token.id,
     totalAmount
   )
-  const isValidCollateralRatio = requiredTokensShare?.gte(minRequiredTokensShare)
+  // calculate max loan using user input value
+  const maxLoanValue = useMaxLoan({
+    totalCollateralValue: totalCalculatedCollateralValue,
+    collateralAmounts: vault.collateralAmounts.map(colAmount => {
+      if (colAmount.displaySymbol === token.displaySymbol) {
+        return {
+          ...colAmount,
+          amount: isAdd ? new BigNumber(colAmount.amount).plus(inputValue).toFixed(8) : new BigNumber(colAmount.amount).minus(inputValue).toFixed(8)
+        }
+      }
+      return colAmount
+    }),
+    existingLoanValue: new BigNumber(vault.loanValue),
+    minColRatio: new BigNumber(vault.loanScheme.minColRatio)
+  })
+
+  const isValidCollateralRatio = resultingColRatio.isGreaterThanOrEqualTo(vault.loanScheme.minColRatio) || resultingColRatio.isNaN() || resultingColRatio.isLessThanOrEqualTo(0)
   const removeMaxCollateralAmount = !isAdd && new BigNumber(collateralValue).isEqualTo(new BigNumber(available)) && prices.vaultShare.isNaN() && collateralItem !== undefined
   const displayNA = new BigNumber(collateralValue).isZero() || collateralValue === '' || removeMaxCollateralAmount
 
@@ -167,7 +184,7 @@ export const AddOrRemoveCollateralForm = memo(({ route }: Props): JSX.Element =>
           })}
         </ThemedText>
         {onCloseButtonPress !== undefined && (
-          <TouchableOpacity onPress={onCloseButtonPress}>
+          <TouchableOpacity onPress={onCloseButtonPress} testID='close_add_or_remove_col_form'>
             <ThemedIcon iconType='MaterialIcons' name='close' size={20} />
           </TouchableOpacity>
         )}
@@ -392,7 +409,7 @@ export const AddOrRemoveCollateralForm = memo(({ route }: Props): JSX.Element =>
         </View>
       )}
       <Button
-        disabled={!isValid || hasPendingJob || hasPendingBroadcastJob || (isFeatureAvailable('dusd_vault_share') && !isAdd && !isValidCollateralRatio && hasLoan)}
+        disabled={!isValid || hasPendingJob || hasPendingBroadcastJob || (isFeatureAvailable('dusd_vault_share') && !isAdd && !isValidCollateralRatio && hasLoan) || maxLoanValue.isNegative()}
         label={translate('components/AddOrRemoveCollateralForm', isAdd ? 'ADD TOKEN AS COLLATERAL' : 'REMOVE COLLATERAL AMOUNT')}
         onPress={() => onButtonPress({
           token,
@@ -401,14 +418,24 @@ export const AddOrRemoveCollateralForm = memo(({ route }: Props): JSX.Element =>
         margin='mt-6 mb-2'
         testID='add_collateral_button_submit'
       />
-      {(isFeatureAvailable('dusd_vault_share') && !isAdd && !isValidCollateralRatio && requiredVaultShareTokens.includes(token.symbol)) && hasLoan && (
+      {isFeatureAvailable('dusd_vault_share') && !isAdd && !isValidCollateralRatio && hasLoan && (
         <ThemedText
           dark={tailwind('text-error-500')}
           light={tailwind('text-error-500')}
           style={tailwind('text-sm text-center')}
           testID='vault_min_share_warning'
         >
-          {translate('screens/BorrowLoanTokenScreen', 'Your vault needs at least 50% of DFI and/or DUSD as collateral')}
+          {translate('screens/BorrowLoanTokenScreen', 'Removing collateral will result in vault liquidation')}
+        </ThemedText>
+      )}
+      {isValidCollateralRatio && hasLoan && maxLoanValue.isNegative() && (
+        <ThemedText
+          dark={tailwind('text-error-500')}
+          light={tailwind('text-error-500')}
+          style={tailwind('text-sm text-center')}
+          testID='vault_min_share_warning'
+        >
+          {translate('screens/BorrowLoanTokenScreen', 'At least 50% of the minimum required collateral in vault must be in DFI and/or DUSD')}
         </ThemedText>
       )}
       <ThemedText

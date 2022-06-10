@@ -36,7 +36,7 @@ import { useResultingCollateralRatio, useValidCollateralRatio } from '../hooks/C
 import { CollateralizationRatioRow } from '../components/CollateralizationRatioRow'
 import { useLoanOperations } from '@screens/AppNavigator/screens/Loans/hooks/LoanOperations'
 import { VaultSectionTextRow } from '../components/VaultSectionTextRow'
-import { useMaxLoanAmount } from '../hooks/MaxLoanAmount'
+import { useMaxLoan } from '../hooks/MaxLoan'
 import { useInterestPerBlock } from '../hooks/InterestPerBlock'
 import { getActivePrice } from '@screens/AppNavigator/screens/Auctions/helpers/ActivePrice'
 import { useBlocksPerDay } from '../hooks/BlocksPerDay'
@@ -81,7 +81,7 @@ export function BorrowLoanTokenScreen ({
     new BigNumber(getActivePrice(loanToken.token.symbol, loanToken.activePrice)),
     interestPerBlock
   )
-  const { requiredTokensShare, minRequiredTokensShare } = useValidCollateralRatio(
+  const { requiredTokensShare } = useValidCollateralRatio(
     vault?.collateralAmounts ?? [],
     new BigNumber(vault?.collateralValue ?? NaN),
     new BigNumber(vault?.loanValue ?? NaN)
@@ -255,7 +255,7 @@ export function BorrowLoanTokenScreen ({
 
         {vault !== undefined && (
           <>
-            {isFeatureAvailable('dusd_vault_share') && requiredTokensShare?.lt(minRequiredTokensShare)
+            {isFeatureAvailable('dusd_vault_share') && requiredTokensShare.isZero()
               ? (
                 <ThemedText
                   dark={tailwind('text-error-500')}
@@ -263,7 +263,7 @@ export function BorrowLoanTokenScreen ({
                   style={tailwind('text-sm text-center mt-2 px-4')}
                   testID='vault_min_share_warning'
                 >
-                  {translate('screens/BorrowLoanTokenScreen', 'This vault needs at least 50% of DFI and/or DUSD to be available for use in minting dTokens')}
+                  {translate('screens/BorrowLoanTokenScreen', 'Insufficient DFI and/or DUSD in vault, add more to start minting dTokens.')}
                 </ThemedText>
               )
               : (
@@ -506,8 +506,9 @@ function VaultInputActive (props: VaultInputActiveProps): JSX.Element {
     message: 'Annual vault interest rate based on the loan scheme selected.'
   }
 
-  const maxLoanAmount = useMaxLoanAmount({
+  const maxLoanAmount = useMaxLoan({
     totalCollateralValue: new BigNumber(props.vault.collateralValue),
+    collateralAmounts: props.vault.collateralAmounts,
     existingLoanValue: new BigNumber(props.vault.loanValue),
     minColRatio: new BigNumber(props.vault.loanScheme.minColRatio),
     loanActivePrice: new BigNumber(getActivePrice(props.loanToken.token.symbol, props.loanToken.activePrice)),
@@ -557,7 +558,7 @@ function VaultInputActive (props: VaultInputActiveProps): JSX.Element {
       />
       <VaultSectionTextRow
         lhs={translate('screens/BorrowLoanTokenScreen', 'Max loan amount')}
-        value={maxLoanAmount.isNaN() ? translate('screens/BorrowLoanTokenScreen', 'N/A') : maxLoanAmount.toFixed(8)}
+        value={maxLoanAmount.isNaN() ? translate('screens/BorrowLoanTokenScreen', 'N/A') : BigNumber.max(maxLoanAmount, 0).toFixed(8)}
         suffix={` ${props.loanToken.token.displaySymbol}`}
         suffixType='text'
         testID='max_loan_amount_text'
