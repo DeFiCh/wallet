@@ -175,7 +175,8 @@
     "Save changes": "Guardar cambios",
     "Address label is too long (max 30 characters)": "El nombre de la dirección es demasiado largo (máx. 30 caracteres)",
     "Invalid label. Maximum of 40 characters.": "Invalid label. Maximum of 40 characters.",
-    "{{length}}/40 characters": "{{length}}/40 characters"
+    "{{length}}/40 characters": "{{length}}/40 characters",
+    "Save label": "Save label"
   },
   "screens/AddOrEditAddressBookScreen": {
     "Edit address label": "Edita el nombre de la dirección",
@@ -230,7 +231,8 @@
   },
   "components/toaster": {
     "Copied": "Copiado",
-    "Address copied": "Address copied"
+    "Address copied": "Address copied",
+    "Wallet created": "Cartera creada"
   },
   "screens/SendScreen": {
     "Send": "Enviar",
@@ -705,7 +707,8 @@
   "screens/common": {
     "CANCEL": "CANCELA",
     "Cancel": "Cancela",
-    "TRY AGAIN": "VOLVER A INTENTAR"
+    "TRY AGAIN": "VOLVER A INTENTAR",
+    "Skip": "Skip"
   },
   "screens/ChangePinScreen": {
     "Create new passcode for your wallet": "Crea una nueva contraseña para tu billetera",
