@@ -459,7 +459,6 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
     <View ref={containerRef} style={tailwind('flex-1')}>
       <ThemedScrollViewV2
         ref={ref}
-        light={tailwind('bg-gray-50')}
         contentContainerStyle={tailwind('pb-8')} testID='portfolio_list'
         refreshControl={
           <RefreshControl
@@ -526,10 +525,10 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
               filteredTokens={sortTokensAssetOnType(assetSortType)}
               navigation={navigation}
               buttonGroupOptions={{
-              activeButtonGroup: activeButtonGroup,
-              setActiveButtonGroup: setActiveButtonGroup,
-              onButtonGroupPress: handleButtonFilter
-            }}
+                activeButtonGroup: activeButtonGroup,
+                setActiveButtonGroup: setActiveButtonGroup,
+                onButtonGroupPress: handleButtonFilter
+              }}
               denominationCurrency={denominationCurrency}
              />)}
         {Platform.OS === 'web'
