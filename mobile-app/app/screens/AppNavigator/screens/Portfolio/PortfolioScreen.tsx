@@ -33,7 +33,9 @@ import { fetchExecutionBlock, fetchFutureSwaps, hasFutureSwap } from '@store/fut
 import { useDenominationCurrency } from './hooks/PortfolioCurrency'
 import { BottomSheetAssetSortList, PortfolioSortType } from './components/BottomSheetAssetSortList'
 import { useAppDispatch } from '@hooks/useAppDispatch'
+import { ActionButtons } from './components/ActionButtons'
 import { AddressSelectionButtonV2 } from './components/AddressSelectionButtonV2'
+import { AssetsFilterRow } from '@screens/AppNavigator/screens/Portfolio/components/AssetsFilterRow'
 import {
   BottomSheetAddressDetailV2
 } from '@screens/AppNavigator/screens/Portfolio/components/BottomSheetAddressDetailV2'
@@ -212,7 +214,6 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
   }, [dstTokens, allTokens, lockedTokens])
 
   const [filteredTokens, setFilteredTokens] = useState(combinedTokens)
-
   // portfolio tab items
   const onPortfolioButtonGroupChange = (portfolioButtonGroupTabKey: PortfolioButtonGroupTabKey): void => {
     setDenominationCurrency(portfolioButtonGroupTabKey)
@@ -455,6 +456,17 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
     ]
   }, [address, isLight])
 
+  const [tabButtonLabel, setTabButtonLabel] = useState<string>('')
+  const setButtonLabel = (buttonGroupTabKey: ButtonGroupTabKey): void => {
+    switch (buttonGroupTabKey) {
+      case (ButtonGroupTabKey.LPTokens):
+        return setTabButtonLabel(ButtonGroupTabKey.LPTokens)
+      case (ButtonGroupTabKey.Crypto):
+        return setTabButtonLabel(ButtonGroupTabKey.Crypto)
+      case (ButtonGroupTabKey.dTokens):
+        return setTabButtonLabel(ButtonGroupTabKey.dTokens)
+    }
+  }
   return (
     <View ref={containerRef} style={tailwind('flex-1')}>
       <ThemedScrollViewV2
@@ -480,6 +492,7 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
             light={tailwind('bg-transparent')}
             dark={tailwind('bg-transparent')}
             onPress={onToggleDisplayBalances}
+
           >
             <ThemedIcon
               iconType='MaterialCommunityIcons'
@@ -499,7 +512,14 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
           denominationCurrency={denominationCurrency}
           setDenominationCurrency={setDenominationCurrency}
         />
+        <ActionButtons />
         <Announcements />
+        <AssetsFilterRow
+          activeButtonGroup={activeButtonGroup}
+          setTabButtonLabel={setButtonLabel}
+          onButtonGroupPress={handleButtonFilter}
+          setActiveButtonGroup={setActiveButtonGroup}
+        />
         <BalanceActionSection navigation={navigation} isZeroBalance={isZeroBalance} />
         {hasPendingFutureSwap && <FutureSwapCta navigation={navigation} />}
         {/* to show bottom sheet for asset sort */}
@@ -531,6 +551,7 @@ export function PortfolioScreen ({ navigation }: Props): JSX.Element {
               onButtonGroupPress: handleButtonFilter
             }}
               denominationCurrency={denominationCurrency}
+              tabButtonLabel={tabButtonLabel}
              />)}
         {Platform.OS === 'web'
           ? (

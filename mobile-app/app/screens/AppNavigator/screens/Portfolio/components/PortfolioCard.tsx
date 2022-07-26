@@ -1,14 +1,12 @@
 import {
   ThemedView,
-  ThemedTouchableOpacity
+  ThemedTouchableOpacity, ThemedViewV2
 } from '@components/themed'
 import { PortfolioParamList } from '../PortfolioNavigator'
 import { PortfolioRowToken } from '../PortfolioScreen'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { View } from '@components'
-import { translate } from '@translations'
 import { tailwind } from '@tailwind'
-import { ButtonGroup } from '../../Dex/components/ButtonGroup'
 import { RootState } from '@store'
 import { useSelector } from 'react-redux'
 import { EmptyBalances } from './EmptyBalances'
@@ -16,19 +14,17 @@ import { TokenNameText } from '@screens/AppNavigator/screens/Portfolio/component
 import { TokenAmountText } from '@screens/AppNavigator/screens/Portfolio/components/TokenAmountText'
 import { useDisplayBalancesContext } from '@contexts/DisplayBalancesContext'
 import { getNativeIcon } from '@components/icons/assets'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import BigNumber from 'bignumber.js'
 import { TokenBreakdownPercentage } from './TokenBreakdownPercentage'
 import { LockedBalance, useTokenLockedBalance } from '../hooks/TokenLockedBalance'
 import { EmptyPortfolio } from './EmptyPortfolio'
-
 export enum ButtonGroupTabKey {
   AllTokens = 'ALL_TOKENS',
   LPTokens = 'LP_TOKENS',
   Crypto = 'CRYPTO',
   dTokens = 'd_TOKENS'
 }
-
 interface PortfolioCardProps {
   isZeroBalance: boolean
   filteredTokens: PortfolioRowToken[]
@@ -40,6 +36,7 @@ interface PortfolioCardProps {
     setActiveButtonGroup: (key: ButtonGroupTabKey) => void
   }
   denominationCurrency: string
+  tabButtonLabel: string
 }
 
 export function PortfolioCard ({
@@ -47,51 +44,10 @@ export function PortfolioCard ({
   filteredTokens,
   dstTokens,
   navigation,
-  buttonGroupOptions,
+  tabButtonLabel,
   denominationCurrency
 }: PortfolioCardProps): JSX.Element {
-  const buttonGroup = [
-    {
-      id: ButtonGroupTabKey.AllTokens,
-      label: translate('screens/PortfolioScreen', 'All tokens'),
-      handleOnPress: () => onButtonGroupChange(ButtonGroupTabKey.AllTokens)
-    },
-    {
-      id: ButtonGroupTabKey.LPTokens,
-      label: translate('screens/PortfolioScreen', 'LP tokens'),
-      handleOnPress: () => onButtonGroupChange(ButtonGroupTabKey.LPTokens)
-    },
-    {
-      id: ButtonGroupTabKey.Crypto,
-      label: translate('screens/PortfolioScreen', 'Crypto'),
-      handleOnPress: () => onButtonGroupChange(ButtonGroupTabKey.Crypto)
-    },
-    {
-      id: ButtonGroupTabKey.dTokens,
-      label: translate('screens/PortfolioScreen', 'dTokens'),
-      handleOnPress: () => onButtonGroupChange(ButtonGroupTabKey.dTokens)
-    }
-  ]
-  const [tabButtonLabel, setTabButtonLabel] = useState('')
   const { hasFetchedToken } = useSelector((state: RootState) => (state.wallet))
-  const onButtonGroupChange = (buttonGroupTabKey: ButtonGroupTabKey): void => {
-    if (buttonGroupOptions !== undefined) {
-      buttonGroupOptions.setActiveButtonGroup(buttonGroupTabKey)
-      buttonGroupOptions.onButtonGroupPress(buttonGroupTabKey)
-      setButtonLabel(buttonGroupTabKey)
-    }
-  }
-
-  const setButtonLabel = (buttonGroupTabKey: ButtonGroupTabKey): void => {
-    switch (buttonGroupTabKey) {
-      case (ButtonGroupTabKey.LPTokens):
-        return setTabButtonLabel('LP tokens')
-      case (ButtonGroupTabKey.Crypto):
-        return setTabButtonLabel('Crypto')
-      case (ButtonGroupTabKey.dTokens):
-        return setTabButtonLabel('dTokens')
-    }
-  }
 
   // return empty component if there are DFI but no other tokens
   if (!isZeroBalance && dstTokens.length === 0) {
@@ -104,23 +60,7 @@ export function PortfolioCard ({
   }
 
   return (
-    <ThemedView>
-      {
-        // filter tab
-        buttonGroupOptions !== undefined &&
-        (
-          <>
-            <View style={tailwind('p-4')}>
-              <ButtonGroup
-                buttons={buttonGroup}
-                activeButtonGroupItem={buttonGroupOptions.activeButtonGroup}
-                labelStyle={tailwind('font-medium text-xs text-center py-0.5')}
-                testID='portfolio_button_group'
-              />
-            </View>
-          </>
-        )
-      }
+    <ThemedViewV2>
       <View testID='card_balance_row_container'>
         {filteredTokens.map((item) => (
           <View key={item.symbol} style={tailwind('p-4 pt-1.5 pb-1.5')}>
@@ -141,7 +81,7 @@ export function PortfolioCard ({
         filteredTokens.length === 0 && hasFetchedToken && tabButtonLabel !== '' &&
           <EmptyBalances type={tabButtonLabel} />
       }
-    </ThemedView>
+    </ThemedViewV2>
   )
 }
 
